@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Scale Out"
+Resources:
+  JatinInstan1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-09a41e26df464c548
+      AvailabilityZone: us-east-1a
+      KeyName: JatinKeyPair
+      Tags:
+        - Key: User
+          Value: Jatin.x
+  JatinLaunchInstance:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        InstanceType: t2.micro
+        ImageId: ami-09a41e26df464c548
+        KeyName: JatinKeyPair
+      LaunchTemplateName: LaunchTemplate
+  JatinAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: JATIN123
+      AvailabilityZones:
+        - us-east-1a
+      LaunchTemplate:
+          LaunchTemplateName: JatinLaunchTemplate
+          Version: !GetAtt JatinLaunchInstance.LatestVersionNumber
+      MaxSize: 2
+      MinSize: 1
+      DesiredCapacity: 2
+  JatinAlram:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Lambda invocations
+      ComparisonOperator: LessThanLowerOrGreaterThanUpperThreshold
+      EvaluationPeriods: 1
+      Metrics:
+      - Expression: ANOMALY_DETECTION_BAND(m1, 2)
+        Id: ad1
+      - Id: m1
+        MetricStat:
+          Metric:
+            MetricName: Invocations
+            Namespace: AWS/Lambda
+          Period: 30
+          Stat: Sum
+      ThresholdMetricId: 30
+      TreatMissingData: breaching
+  JatinAlram1:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Lambda invocations
+      ComparisonOperator: LessThanLowerOrGreaterThanUpperThreshold
+      EvaluationPeriods: 1
+      Metrics:
+      - Expression: ANOMALY_DETECTION_BAND(m1, 2)
+        Id: ad1
+      - Id: m1
+        MetricStat:
+          Metric:
+            MetricName: Invocations
+            Namespace: AWS/Lambda
+          Period: 30
+          Stat: Sum
+      ThresholdMetricId: 30
+      TreatMissingData: breaching
